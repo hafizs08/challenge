@@ -1,0 +1,70 @@
+server:
+  port: 8032
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: api-gateway
+  datasource:
+    url: jdbc:mysql://localhost:3306/user_ch?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: root
+    password: ""
+    jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods: "GET, POST, PUT, DELETE, OPTIONS"
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: userLogin
+          uri: lb://userLogin
+          predicates:
+            - Path=/auth/**
+        - id: buku
+          uri: http://localhost:8181
+          predicates:
+            - Path=/buku/**
+        - id: peminjaman
+          uri: http://localhost:8083
+          predicates:
+            - Path=/peminjaman/**
+        - id: payment
+          uri: http://localhost:8146
+          predicates:
+            - Path=/payment/**
+        - id: notif
+          uri: http://localhost:8321
+          predicates:
+            - Path=/api/email/**
+        - id: rating
+          uri: http://localhost:8282
+          predicates:
+            - Path=/rating/**
+
+
+jwt:
+  secret: myverystrongsecretkeythatismorethan32charactersdsfdsfsdfdfgfdhdfgsdfsdsdft
+
+  logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    com.library.gateway: DEBUG
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    preferIpAddress: true
